@@ -1,0 +1,97 @@
+# Healthcare AI Safety Guardrails Configuration
+# Production-ready configuration for clinical environments
+
+environment: production
+version: "1.0.0"
+
+# Model Configuration
+model:
+  extraction_model: "gpt-4"
+  verifier_model: "gpt-4"
+  embedding_model: "text-embedding-3-small"
+  extraction_temperature: 0.0  # Deterministic for clinical accuracy
+  verifier_temperature: 0.0
+  consistency_temperature: 0.3  # Slight variation for consistency checks
+  max_tokens: 4096
+  timeout_seconds: 60
+
+# RAG (Retrieval-Augmented Generation) Configuration
+rag:
+  chunk_size: 512
+  chunk_overlap: 50
+  top_k_chunks: 5
+  embedding_dimension: 1536
+  min_similarity_threshold: 0.3
+  high_similarity_threshold: 0.7
+
+# Hallucination Detection Configuration
+hallucination_detection:
+  # Layer 1: Faithfulness
+  faithfulness_threshold: 0.6
+  min_evidence_chunks: 1
+
+  # Layer 2: Contradiction
+  contradiction_confidence_threshold: 0.8
+
+  # Layer 3: Self-Consistency
+  consistency_num_runs: 5
+  consistency_agreement_threshold: 0.8
+  consistency_variance_threshold: 0.2
+
+  # Layer 4: Rule Validation
+  enable_rule_validation: true
+  strict_rule_enforcement: true
+
+# Confidence Scoring Configuration
+confidence:
+  accept_threshold: 0.85
+  review_threshold: 0.60
+  critical_field_threshold_boost: 0.05
+  weights:
+    retrieval_faithfulness: 0.35
+    verifier_agreement: 0.25
+    self_consistency: 0.20
+    rule_validation: 0.20
+
+# Safety Guardrails Configuration
+safety:
+  # Hard safety rules (cannot be overridden)
+  never_infer_diagnoses: true
+  never_hallucinate_missing: true
+  never_normalize_abbreviations: true
+  never_override_clinician_text: true
+
+  # Medication safety
+  medication_dose_validation: true
+  max_safe_dose_multiplier: 10.0
+
+  # Lab value validation
+  lab_value_range_validation: true
+
+  # Date validation
+  future_date_allowed: false
+  max_past_years: 100
+
+# Audit Configuration
+audit:
+  enable_audit_logging: true
+  log_level: "INFO"
+  log_format: "json"
+  log_directory: "./audit_logs"
+  max_log_size_mb: 100
+  log_retention_days: 365
+  log_extractions: true
+  log_decisions: true
+  log_evidence: true
+  log_model_responses: true
+
+# Evaluation Configuration
+evaluation:
+  enable_online_evaluation: true
+  enable_offline_evaluation: true
+  track_hallucination_rate: true
+  track_unsupported_claim_rate: true
+  track_abstention_accuracy: true
+  track_critical_field_precision: true
+  max_hallucination_rate: 0.05
+  min_critical_field_precision: 0.95
